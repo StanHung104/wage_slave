@@ -3,19 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>社畜觀察日記 v2</title>
+  <title>社畜觀察日記 v3</title>
   <style>
     :root {
-      --bg-day: #e8f4f8;
-      --bg-evening: #fce4d6;
-      --bg-night: #1e2436;
+      --wall-day: #fdf6e3;
+      --wall-evening: #fce4d6;
+      --wall-night: #1e2436;
+      --floor-day: #deb887;
+      --floor-night: #5d4037;
       --text-main: #2d3436;
       --primary: #0984e3;
     }
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; }
     body {
       margin: 0;
-      background-color: #dfe6e9;
+      background-color: #2d3436;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -25,18 +27,18 @@
       width: 100%;
       max-width: 420px;
       height: 100vh;
-      max-height: 840px;
-      background: var(--bg-day);
+      max-height: 850px;
+      background: var(--wall-day);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.3);
       position: relative;
       overflow: hidden;
       transition: background 0.8s ease;
     }
-    .game-container.evening { background: var(--bg-evening); }
-    .game-container.night { background: var(--bg-night); color: #f5f6fa; }
+    .game-container.evening { background: var(--wall-evening); }
+    .game-container.night { background: var(--wall-night); color: #f5f6fa; }
 
     /* 時事跑馬燈 */
     .news-banner {
@@ -49,30 +51,32 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      z-index: 20;
     }
 
     /* 頂部狀態列 */
     .top-bar {
-      background: rgba(255, 255, 255, 0.94);
+      background: rgba(255, 255, 255, 0.95);
       color: var(--text-main);
-      padding: 10px 16px;
+      padding: 10px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid rgba(0,0,0,0.08);
-      z-index: 10;
+      z-index: 20;
     }
-    .stat-group { display: flex; gap: 8px; font-size: 13px; font-weight: 600; }
+    .stat-group { display: flex; gap: 6px; font-size: 12px; font-weight: 700; }
     .stat-badge { background: #f1f2f6; padding: 4px 8px; border-radius: 12px; }
 
     /* 時間與測試控制列 */
     .time-bar {
       background: rgba(0,0,0,0.06);
-      padding: 6px 16px;
+      padding: 6px 14px;
       font-size: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      z-index: 20;
     }
     .night .time-bar { background: rgba(255,255,255,0.1); }
     .btn-sim {
@@ -84,78 +88,223 @@
       font-size: 11px;
       cursor: pointer;
     }
-    .btn-sim:active { transform: scale(0.96); }
+    .btn-sim:active { transform: scale(0.95); }
 
-    /* 房間主視覺區 */
-    .room-area {
+    /* 互動房間主場景 */
+    .room-stage {
       flex: 1;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    /* 窗戶 (隨日夜變色) */
+    .room-window {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      width: 96px;
+      height: 84px;
+      background: #74b9ff;
+      border: 5px solid #8d6e63;
+      border-radius: 8px;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      position: relative;
-      text-align: center;
+      font-size: 32px;
+      box-shadow: inset 0 0 12px rgba(0,0,0,0.15);
+      transition: background 0.8s ease;
     }
+    .evening .room-window { background: #fab1a0; }
+    .night .room-window { background: #0c2461; }
+    .window-cross-h { position: absolute; width: 100%; height: 4px; background: #8d6e63; }
+    .window-cross-v { position: absolute; height: 100%; width: 4px; background: #8d6e63; }
+
+    /* 戰利品展示架 */
     .room-decor {
       position: absolute;
-      top: 16px;
+      top: 20px;
       right: 16px;
       display: flex;
       flex-direction: column;
       gap: 6px;
       align-items: flex-end;
+      z-index: 5;
     }
     .decor-tag {
-      background: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.92);
       color: #2d3436;
       padding: 4px 10px;
       border-radius: 8px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
     }
-    .character-box {
-      font-size: 84px;
-      margin-bottom: 12px;
-      transition: transform 0.3s ease;
+
+    /* 房間木地板 */
+    .room-floor {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 46%;
+      background: repeating-linear-gradient(
+        0deg,
+        var(--floor-day),
+        var(--floor-day) 24px,
+        #d2a679 25px,
+        #d2a679 26px
+      );
+      border-top: 4px solid #8d6e63;
+      transition: background 0.8s ease;
+    }
+    .night .room-floor {
+      background: repeating-linear-gradient(
+        0deg,
+        var(--floor-night),
+        var(--floor-night) 24px,
+        #4e342e 25px,
+        #4e342e 26px
+      );
+    }
+
+    /* 固定家具擺設 */
+    .furniture {
+      position: absolute;
+      font-size: 46px;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
+      pointer-events: none;
+    }
+    .furn-bed { bottom: 135px; left: 18px; font-size: 54px; }
+    .furn-desk { bottom: 140px; right: 22px; font-size: 48px; }
+    .furn-tv { bottom: 25px; left: 24px; font-size: 46px; }
+    .furn-console {
+      bottom: 18px;
+      left: 72px;
+      font-size: 24px;
+      display: none;
+      animation: pulseGlow 1.5s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { transform: scale(1); filter: drop-shadow(0 0 2px #00cec9); }
+      to { transform: scale(1.12); filter: drop-shadow(0 0 8px #0984e3); }
+    }
+
+    /* 會走動的水豚角色容器 */
+    .capybara-actor {
+      position: absolute;
+      left: 50%;
+      bottom: 75px;
+      transform: translate(-50%, 0);
+      transition: left 2.2s linear, bottom 2.2s linear;
+      z-index: 12;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       cursor: pointer;
     }
-    .character-box:hover { transform: scale(1.05); }
-    .status-bubble {
-      background: rgba(255,255,255,0.95);
+
+    /* 頭頂小氣泡 */
+    .thought-bubble {
+      background: rgba(255, 255, 255, 0.96);
       color: #2d3436;
-      padding: 12px 18px;
-      border-radius: 16px;
-      max-width: 88%;
-      font-size: 14px;
-      line-height: 1.5;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      margin-bottom: 6px;
+      position: relative;
+      max-width: 240px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .thought-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px 6px 0;
+      border-style: solid;
+      border-color: rgba(255,255,255,0.96) transparent transparent;
+    }
+
+    /* 水豚本體與走路搖擺動畫 */
+    .capybara-sprite {
+      font-size: 64px;
+      line-height: 1;
+      filter: drop-shadow(0 6px 6px rgba(0,0,0,0.25));
+      transition: transform 0.2s ease;
+    }
+    .capybara-sprite.facing-right { transform: scaleX(-1); }
+    .capybara-sprite.walking {
+      animation: waddle 0.35s infinite alternate ease-in-out;
+    }
+    .capybara-sprite.facing-right.walking {
+      animation: waddleRight 0.35s infinite alternate ease-in-out;
+    }
+    @keyframes waddle {
+      0% { transform: translateY(0px) rotate(-4deg); }
+      100% { transform: translateY(-6px) rotate(4deg); }
+    }
+    @keyframes waddleRight {
+      0% { transform: scaleX(-1) translateY(0px) rotate(-4deg); }
+      100% { transform: scaleX(-1) translateY(-6px) rotate(4deg); }
+    }
+
+    /* 點擊愛心特效 */
+    .heart-pop {
+      position: absolute;
+      font-size: 22px;
+      pointer-events: none;
+      animation: floatUp 1s ease-out forwards;
+      z-index: 30;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(0.8); }
+      100% { opacity: 0; transform: translateY(-45px) scale(1.3); }
+    }
+
+    /* 底部狀態文字條 */
+    .status-strip {
+      background: rgba(255,255,255,0.92);
+      color: #2d3436;
+      margin: 8px 14px 6px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.4;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      z-index: 15;
     }
 
     /* 動態訊息紀錄區 */
     .log-feed {
-      height: 155px;
-      background: rgba(255,255,255,0.88);
+      height: 125px;
+      background: rgba(255,255,255,0.9);
       color: #2d3436;
-      margin: 0 16px 12px;
-      border-radius: 12px;
-      padding: 10px 14px;
+      margin: 0 14px 10px;
+      border-radius: 10px;
+      padding: 8px 12px;
       overflow-y: auto;
-      font-size: 13px;
-      box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+      font-size: 12px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+      z-index: 15;
     }
-    .log-item { margin-bottom: 6px; border-bottom: 1px dashed #dfe6e9; padding-bottom: 4px; }
-    .log-time { color: #636e72; font-size: 11px; margin-right: 6px; }
+    .log-item { margin-bottom: 5px; border-bottom: 1px dashed #dfe6e9; padding-bottom: 4px; }
+    .log-time { color: #636e72; font-size: 11px; margin-right: 5px; }
 
     /* 底部操作列 */
     .bottom-nav {
       background: #ffffff;
-      padding: 12px 16px;
+      padding: 10px 14px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      gap: 8px;
       border-top: 1px solid rgba(0,0,0,0.08);
+      z-index: 20;
     }
     .nav-btn {
       background: #f1f2f6;
@@ -167,6 +316,7 @@
       color: #2d3436;
       cursor: pointer;
     }
+    .nav-btn:active { background: #dfe6e9; }
 
     /* 彈窗 Modal */
     .modal-overlay {
@@ -258,13 +408,35 @@
     </div>
   </div>
 
-  <!-- 房間主畫面 -->
-  <div class="room-area">
-    <div class="room-decor" id="uiDecor"></div>
-    <div class="character-box" id="uiCharAvatar">🦫</div>
-    <div class="status-bubble" id="uiStatusText">
-      正在讀取水豚的今日行程...
+  <!-- 互動房間場景 -->
+  <div class="room-stage" id="roomStage" onclick="handleRoomClick(event)">
+    <!-- 窗戶 -->
+    <div class="room-window">
+      <span id="windowSkyIcon">☀️</span>
+      <div class="window-cross-h"></div>
+      <div class="window-cross-v"></div>
     </div>
+
+    <!-- 戰利品擺設清單 -->
+    <div class="room-decor" id="uiDecor"></div>
+
+    <!-- 地板與家具 -->
+    <div class="room-floor"></div>
+    <div class="furniture furn-bed" title="社畜單人床">🛏️</div>
+    <div class="furniture furn-desk" title="電腦書桌">🖥️</div>
+    <div class="furniture furn-tv" title="客廳電視">📺</div>
+    <div class="furniture furn-console" id="furnPs5" title="PS5 Pro + GTA 6">🎮</div>
+
+    <!-- 會走動的水豚角色 -->
+    <div class="capybara-actor" id="capyActor" onclick="petCapybara(event)">
+      <div class="thought-bubble" id="capyBubble">今天也要加油...</div>
+      <div class="capybara-sprite" id="capySprite">🦫</div>
+    </div>
+  </div>
+
+  <!-- 狀態摘要條 -->
+  <div class="status-strip" id="uiStatusText">
+    提示：點擊地板可以叫水豚走過去，點擊水豚可以摸摸他！
   </div>
 
   <!-- 即時動態紀錄 -->
@@ -323,9 +495,8 @@
 </div>
 
 <script>
-  // 設定檔來源 (目前為方案 B: 同倉庫相對路徑；未來正式上線改方案 A 只需換成 R2 網址)
   const CONFIG_URL = './events_config.json';
-  const STORAGE_KEY = 'office_animal_v2';
+  const STORAGE_KEY = 'office_animal_v3';
 
   const ITEMS_DB = {
     food_onigiri: { id: 'food_onigiri', name: '🍙 超商御飯糰', type: 'food', price: 100, desc: '基本飽足，肝力 +5', effects: { stamina: 5, mood: 0, otReduce: 0 } },
@@ -336,68 +507,185 @@
     item_game_flyer: { id: 'item_game_flyer', name: '🎮 《GTA 6》預購宣傳單', type: 'item', price: 300, desc: '下班衝去買 PS5 玩 GTA 權重 x4！', effects: { otReduce: 0.05, gtaBoost: 4 } }
   };
 
-  // 內建備援事件庫 (防斷網保護)
   let eventsPool = [
     {
-      id: 'FALLBACK_NORMAL',
-      title: '🛌 平凡的躺平夜',
+      id: 'EVT_GTA6_NIGHT',
+      title: '🎮 罪惡都市的狂歡夜！',
+      type: 'AFTER_WORK',
+      minMood: 65,
+      minMoney: 15000,
+      baseWeight: 40,
+      isGtaEvent: true,
+      moneyDelta: -15000,
+      moodDelta: 25,
+      staminaDelta: -10,
+      unlockDecor: '🎮 PS5 Pro + GTA 6',
+      avatar: '🦫🎮',
+      log: '準時閃人成功！衝去電玩店抱了一台 PS5 與《GTA 6》回家，今晚窩在電視前破關！'
+    },
+    {
+      id: 'EVT_NORMAL_SLEEP',
+      title: '🛌 平凡的追劇躺平夜',
       type: 'AFTER_WORK',
       minMood: 0,
       minMoney: 0,
-      baseWeight: 100,
+      baseWeight: 35,
       moneyDelta: 0,
       moodDelta: 5,
       staminaDelta: 15,
       avatar: '🦫🛌',
-      log: '平安度過一天，回家躺平滑手機。'
+      log: '平安度過一天，洗完澡直接躺平滑手機，這就是社畜最樸實的快樂。'
     }
   ];
 
   const now = new Date();
   const DEFAULT_STATE = {
     day: 1,
-    hour: now.getHours(),
+    hour: 8, // 預設從早上 8 點開始方便直接體驗出門前準備
     lastTimestamp: Date.now(),
     mood: 75,
     stamina: 80,
     money: 16000,
-    isAtWork: now.getHours() >= 9 && now.getHours() < 18,
+    isAtWork: false,
     isOvertimeToday: false,
     equipped: { food: null, item: null },
     inventory: { food_bento: 1, item_game_flyer: 1 },
     decorations: [],
     album: [],
-    logs: [{ time: `Day 1 ${String(now.getHours()).padStart(2, '0')}:00`, text: '歡迎來到社畜觀察日記！系統已同步現實時間。' }]
+    logs: [{ time: 'Day 1 08:00', text: '早上好！水豚正在房間散步，快幫他準備便當跟小物吧！' }]
   };
 
   let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(DEFAULT_STATE));
 
-  // 初始化入口：先抓遠端 JSON，再結算離線時間
+  // 角色位置與自動漫步 AI 狀態
+  let actorPos = { x: 50, bottom: 75 }; // x: 18%~82%, bottom: 30px~135px
+  let walkTimer = null;
+  let stopWalkTimeout = null;
+
   async function initGame() {
     try {
       const res = await fetch(`${CONFIG_URL}?t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
-        if (data.events && data.events.length > 0) {
-          eventsPool = data.events;
-        }
+        if (data.events && data.events.length > 0) eventsPool = data.events;
         document.getElementById('uiNewsBanner').textContent = data.active_banner || '💼 社畜生存戰持續進行中';
+      } else {
+        document.getElementById('uiNewsBanner').textContent = '🔥 本週時事：《GTA 6》熱賣中！準時下班有機率帶回 PS5！';
       }
     } catch (e) {
-      document.getElementById('uiNewsBanner').textContent = '📴 離線模式運行中（使用本機事件庫）';
+      document.getElementById('uiNewsBanner').textContent = '🔥 本週時事：《GTA 6》熱賣中！準時下班有機率帶回 PS5！';
     }
 
-    // 計算真實離線經過的小時數 (最多一次補算 72 小時避免卡頓)
     const elapsedMs = Date.now() - (state.lastTimestamp || Date.now());
     const elapsedHours = Math.min(72, Math.floor(elapsedMs / (1000 * 60 * 60)));
-
     if (elapsedHours >= 1) {
-      addLog(`⏳ 你離開了 ${elapsedHours} 小時，正在自動結算期間發生的事件...`);
+      addLog(`⏳ 離線經過 ${elapsedHours} 小時，已自動結算期間行程。`);
       advanceTime(elapsedHours, false);
     }
 
     state.lastTimestamp = Date.now();
     saveState();
+    startWanderingAI();
+  }
+
+  // 水豚自主散步系統
+  function startWanderingAI() {
+    if (walkTimer) clearInterval(walkTimer);
+    walkTimer = setInterval(() => {
+      if (state.isAtWork) return; // 出門上班時不移動
+      if (state.hour >= 0 && state.hour < 7) {
+        // 睡覺時間固定待在床邊
+        moveCapybaraTo(26, 125, '呼嚕呼嚕... 💤');
+        return;
+      }
+
+      // 若已買 PS5 且在晚上，有高機率走到電視機前面打電動
+      const hasPs5 = state.decorations.some(d => d.includes('PS5'));
+      if (hasPs5 && state.hour >= 18 && Math.random() < 0.6) {
+        moveCapybaraTo(32, 35, '《GTA 6》太好玩啦！🎮');
+        return;
+      }
+
+      // 隨機在房間地板範圍內散步
+      const targetX = Math.floor(Math.random() * 62) + 20; // 20% ~ 82%
+      const targetBottom = Math.floor(Math.random() * 95) + 32; // 32px ~ 127px
+      const thoughts = [
+        '在房間伸個懶腰~',
+        '今天下班要吃什麼呢？',
+        '存錢買新遊戲機！',
+        '不想面對明天的會議...',
+        '巡視一下領地 🐾'
+      ];
+      const randomThought = thoughts[Math.floor(Math.random() * thoughts.length)];
+      moveCapybaraTo(targetX, targetBottom, randomThought);
+    }, 4200);
+  }
+
+  function moveCapybaraTo(targetX, targetBottom, thoughtText) {
+    const actor = document.getElementById('capyActor');
+    const sprite = document.getElementById('capySprite');
+    const bubble = document.getElementById('capyBubble');
+
+    // 判斷左右方向並翻轉角色朝向
+    if (targetX > actorPos.x) {
+      sprite.classList.add('facing-right');
+    } else if (targetX < actorPos.x) {
+      sprite.classList.remove('facing-right');
+    }
+
+    actorPos = { x: targetX, bottom: targetBottom };
+    actor.style.left = `${targetX}%`;
+    actor.style.bottom = `${targetBottom}px`;
+
+    sprite.classList.add('walking');
+    if (thoughtText) bubble.textContent = thoughtText;
+
+    if (stopWalkTimeout) clearTimeout(stopWalkTimeout);
+    stopWalkTimeout = setTimeout(() => {
+      sprite.classList.remove('walking');
+    }, 2200);
+  }
+
+  // 點擊房間地板叫水豚走過去
+  function handleRoomClick(e) {
+    if (state.isAtWork) return;
+    const stage = document.getElementById('roomStage');
+    const rect = stage.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
+    // 限制只能在地板區域 (下半部) 走動
+    const fromBottom = rect.height - clickY;
+    if (fromBottom > 155 || fromBottom < 20) return;
+
+    const pctX = Math.min(82, Math.max(18, (clickX / rect.width) * 100));
+    moveCapybaraTo(pctX, fromBottom, '噠噠噠！跑過來了~');
+  }
+
+  // 點擊水豚撫摸互動
+  let lastPetTime = 0;
+  function petCapybara(e) {
+    e.stopPropagation();
+    if (state.isAtWork) return;
+
+    // 冒出愛心特效
+    const stage = document.getElementById('roomStage');
+    const heart = document.createElement('div');
+    heart.className = 'heart-pop';
+    heart.textContent = '❤️';
+    heart.style.left = `${actorPos.x}%`;
+    heart.style.bottom = `${actorPos.bottom + 65}px`;
+    stage.appendChild(heart);
+    setTimeout(() => heart.remove(), 1000);
+
+    document.getElementById('capyBubble').textContent = '被摸頭好舒服～ (心情上升)';
+
+    // 每 10 秒最多加一次心情避免無限刷
+    if (Date.now() - lastPetTime > 10000) {
+      lastPetTime = Date.now();
+      state.mood = Math.min(100, state.mood + 2);
+      saveState();
+    }
   }
 
   function saveState() {
@@ -408,11 +696,8 @@
   function resetSave() {
     if (!confirm('確定要重置所有存檔進度嗎？')) return;
     localStorage.removeItem(STORAGE_KEY);
-    const freshNow = new Date();
     state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-    state.hour = freshNow.getHours();
     state.lastTimestamp = Date.now();
-    state.isAtWork = state.hour >= 9 && state.hour < 18;
     saveState();
   }
 
@@ -433,14 +718,11 @@
       }
       processHourTick(state.hour);
     }
-    if (!isManualSim) {
-      state.lastTimestamp = Date.now();
-    }
+    if (!isManualSim) state.lastTimestamp = Date.now();
     saveState();
   }
 
   function processHourTick(h) {
-    // 09:00 出門上班結算裝備
     if (h === 9) {
       state.isAtWork = true;
       state.isOvertimeToday = false;
@@ -452,13 +734,11 @@
         msg += ` 帶了【${f.name}】。`;
       }
       if (state.equipped.item) {
-        const it = ITEMS_DB[state.equipped.item];
-        msg += ` 隨身攜帶【${it.name}】。`;
+        msg += ` 隨身攜帶【${ITEMS_DB[state.equipped.item].name}】。`;
       }
       addLog(msg);
     }
 
-    // 14:00 午間職場隨機事件 (從 JSON 抽取 WORK_RANDOM)
     if (h === 14 && state.isAtWork) {
       const workEvents = eventsPool.filter(e => e.type === 'WORK_RANDOM');
       if (workEvents.length > 0) {
@@ -466,10 +746,12 @@
         state.mood = Math.min(100, Math.max(0, state.mood + (picked.moodDelta || 0)));
         state.stamina = Math.min(100, Math.max(0, state.stamina + (picked.staminaDelta || -10)));
         addLog(picked.log);
+      } else {
+        state.stamina = Math.max(0, state.stamina - 10);
+        addLog('📱 [LINE動態] 下午開會開到眼神死，肝力 -10...');
       }
     }
 
-    // 18:00 加班判定與下班開獎
     if (h === 18 && state.isAtWork) {
       let otChance = 0.40;
       let gtaMultiplier = 1;
@@ -494,13 +776,11 @@
       }
     }
 
-    // 21:00 加班結束回家
     if (h === 21 && state.isAtWork && state.isOvertimeToday) {
       state.isAtWork = false;
       triggerAfterWorkEvent(true, 1);
     }
 
-    // 01:00 睡覺回復精力
     if (h === 1 && !state.isAtWork) {
       state.stamina = Math.min(100, state.stamina + 35);
       addLog('💤 進入深度睡眠，肝力回復 +35。');
@@ -527,7 +807,14 @@
   function triggerAfterWorkEvent(isOvertime, gtaMultiplier) {
     if (isOvertime) {
       const otCandidates = eventsPool.filter(e => e.type === 'OVERTIME');
-      const selected = otCandidates.length > 0 ? weightedPick(otCandidates, 1) : eventsPool[0];
+      const selected = otCandidates.length > 0 ? weightedPick(otCandidates, 1) : {
+        title: '💻 系統大當機被迫加班',
+        moneyDelta: 600,
+        moodDelta: -18,
+        staminaDelta: -25,
+        avatar: '🦫💦',
+        log: '加班到晚上九點才回家，賺了微薄加班費但靈魂已出竅...'
+      };
       applyEventResult(selected);
       return;
     }
@@ -560,8 +847,8 @@
     });
 
     addLog(`🎉 【${evt.title}】${evt.log}`);
-    document.getElementById('uiCharAvatar').textContent = evt.avatar || '🦫';
-    document.getElementById('uiStatusText').textContent = evt.log;
+    document.getElementById('uiStatusText').textContent = `最新動態：${evt.log}`;
+    document.getElementById('capyBubble').textContent = evt.title;
   }
 
   function renderUI() {
@@ -575,21 +862,24 @@
 
     const container = document.getElementById('gameContainer');
     container.className = 'game-container ' + (period === '黃昏' ? 'evening' : (period === '夜晚' ? 'night' : ''));
+    document.getElementById('windowSkyIcon').textContent = period === '白天' ? '☀️' : (period === '黃昏' ? '🌇' : '🌙');
 
+    // 戰利品與 PS5 實體顯示
     const decorEl = document.getElementById('uiDecor');
     decorEl.innerHTML = state.decorations.map(d => `<div class="decor-tag">✨ ${d}</div>`).join('');
+    const hasPs5 = state.decorations.some(d => d.includes('PS5'));
+    document.getElementById('furnPs5').style.display = hasPs5 ? 'block' : 'none';
 
+    // 主角在房間 vs 出門上班的表現
+    const sprite = document.getElementById('capySprite');
+    const bubble = document.getElementById('capyBubble');
     if (state.isAtWork) {
-      document.getElementById('uiCharAvatar').textContent = '🚪📝';
-      document.getElementById('uiStatusText').textContent = state.isOvertimeToday
-        ? '桌上留著字條：「正在公司加班救火中，晚點回來...」'
-        : '桌上留著字條：「出門上班囉！18:00 準時見！」';
-    } else if (state.hour >= 0 && state.hour < 7) {
-      document.getElementById('uiCharAvatar').textContent = '🦫💤';
-      document.getElementById('uiStatusText').textContent = '呼嚕呼嚕... 正在充電恢復肝力中。';
-    } else if (state.hour >= 7 && state.hour < 9) {
-      document.getElementById('uiCharAvatar').textContent = '🦫🎒';
-      document.getElementById('uiStatusText').textContent = '準備出門上班中！快檢查背包有沒有放便當與小物。';
+      sprite.textContent = '📝';
+      sprite.classList.remove('walking');
+      bubble.textContent = state.isOvertimeToday ? '正在公司加班救火中...' : '出門上班囉！18:00 見！';
+      document.getElementById('uiStatusText').textContent = '水豚出門上班了，桌上留了一張字條。';
+    } else {
+      sprite.textContent = (state.hour >= 0 && state.hour < 7) ? '🦫💤' : '🦫';
     }
 
     const logEl = document.getElementById('uiLogFeed');
@@ -706,7 +996,6 @@
     `).join('');
   }
 
-  // 啟動遊戲
   initGame();
 </script>
 </body>
