@@ -1,0 +1,124 @@
+{
+  "version": "2026.11.26",
+  "active_banner": "🔥 本週熱門時事：《GTA 6》正式發售！準時下班有機率帶回 PS5！",
+  "events": [
+    {
+      "id": "EVT_GTA6_NIGHT",
+      "title": "🎮 罪惡都市的狂歡夜！",
+      "type": "AFTER_WORK",
+      "minMood": 65,
+      "minMoney": 15000,
+      "baseWeight": 40,
+      "isGtaEvent": true,
+      "moneyDelta": -15000,
+      "moodDelta": 25,
+      "staminaDelta": -10,
+      "unlockDecor": "🎮 PS5 Pro + GTA 6",
+      "avatar": "🦫🎮",
+      "log": "準時閃人成功！衝去電玩店抱了一台 PS5 與《GTA 6》回家，今晚窩在沙發不睡覺了！"
+    },
+    {
+      "id": "EVT_GTA6_WINDOW_SHOP",
+      "title": "😭 電玩店櫥窗前的凝視",
+      "type": "AFTER_WORK",
+      "minMood": 50,
+      "minMoney": 0,
+      "baseWeight": 25,
+      "isGtaEvent": true,
+      "moneyDelta": 0,
+      "moodDelta": -5,
+      "staminaDelta": 0,
+      "avatar": "🦫👀",
+      "log": "下班路過電玩店看到《GTA 6》實機試玩，摸了摸乾扁的錢包，決定回家看實況主玩就好..."
+    },
+    {
+      "id": "EVT_IZAKAYA",
+      "title": "🍢 居酒屋獨酌小確幸",
+      "type": "AFTER_WORK",
+      "minMood": 40,
+      "minMoney": 800,
+      "baseWeight": 25,
+      "moneyDelta": -800,
+      "moodDelta": 15,
+      "staminaDelta": 5,
+      "avatar": "🦫🍢",
+      "log": "下班順路去吃了串燒喝生啤，把今天的鳥事全部消化掉了。"
+    },
+    {
+      "id": "EVT_TEAM_BUY_ROLL",
+      "title": "🍰 辦公室團購戰利品",
+      "type": "AFTER_WORK",
+      "minMood": 0,
+      "minMoney": 350,
+      "baseWeight": 20,
+      "moneyDelta": -350,
+      "moodDelta": 10,
+      "staminaDelta": 5,
+      "unlockDecor": "🍰 排隊生乳捲",
+      "avatar": "🦫🍰",
+      "log": "等了三個月的辦公室團購生乳捲今天到貨！帶回家當宵夜幸福感爆棚。"
+    },
+    {
+      "id": "EVT_NORMAL_SLEEP",
+      "title": "🛌 平凡的追劇躺平夜",
+      "type": "AFTER_WORK",
+      "minMood": 0,
+      "minMoney": 0,
+      "baseWeight": 35,
+      "moneyDelta": 0,
+      "moodDelta": 5,
+      "staminaDelta": 15,
+      "avatar": "🦫🛌",
+      "log": "平安度過一天，洗完澡直接躺平滑手機，這就是社畜最樸實的快樂。"
+    },
+    {
+      "id": "EVT_OVERTIME_CRASH",
+      "title": "💻 系統大當機被迫加班",
+      "type": "OVERTIME",
+      "baseWeight": 40,
+      "moneyDelta": 600,
+      "moodDelta": -18,
+      "staminaDelta": -25,
+      "avatar": "🦫💦",
+      "log": "下班前 5 分鐘系統炸裂，被迫加班到晚上九點，賺了微薄加班費但靈魂已出竅..."
+    },
+    {
+      "id": "EVT_OVERTIME_MEETING",
+      "title": "📊 無止盡的跨部門檢討會",
+      "type": "OVERTIME",
+      "baseWeight": 35,
+      "moneyDelta": 450,
+      "moodDelta": -15,
+      "staminaDelta": -20,
+      "avatar": "🦫😵",
+      "log": "開會開到懷疑人生，各部門互踢皮球，回到家連洗澡的力氣都快沒了。"
+    },
+    {
+      "id": "EVT_WORK_TEA",
+      "title": "🧋 下午茶手搖飲救援",
+      "type": "WORK_RANDOM",
+      "baseWeight": 35,
+      "moodDelta": 8,
+      "staminaDelta": -5,
+      "log": "📱 [LINE動態] 隔壁部門請喝五十嵐珍奶！全糖去冰拯救了下午的靈魂。"
+    },
+    {
+      "id": "EVT_WORK_SLACK",
+      "title": "🚽 帶薪如廁沉思錄",
+      "type": "WORK_RANDOM",
+      "baseWeight": 35,
+      "moodDelta": 5,
+      "staminaDelta": -5,
+      "log": "📱 [LINE動態] 在廁所隔間滑了 15 分鐘手機，成功避開主管的眼神接觸。"
+    },
+    {
+      "id": "EVT_WORK_BUG",
+      "title": "🔥 突發緊急需求插單",
+      "type": "WORK_RANDOM",
+      "baseWeight": 30,
+      "moodDelta": -10,
+      "staminaDelta": -15,
+      "log": "📱 [LINE動態] 業務突然跑來說客戶明天就要看新報表，血壓瞬間飆高..."
+    }
+  ]
+}
