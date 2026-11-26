@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>社畜觀察日記 v6</title>
+  <title>社畜觀察日記 v7</title>
   <style>
     :root {
       --wall-day: #f7efe2;
@@ -74,7 +74,7 @@
       color: #4a4036;
     }
 
-    /* 時間狀態列 (正式版乾淨顯示，無測試按鈕) */
+    /* 時間狀態列 */
     .time-bar {
       background: rgba(61, 53, 46, 0.05);
       padding: 6px 14px;
@@ -86,7 +86,7 @@
     }
     .night .time-bar { background: rgba(255, 255, 255, 0.08); }
 
-    /* 管理者專用後台工具列 (預設完全隱藏，驗證通過才顯示) */
+    /* 管理者專用後台工具列 */
     .admin-panel {
       display: none;
       background: #2b2d42;
@@ -128,21 +128,23 @@
       pointer-events: none;
     }
 
-    /* 戰利品小標籤 */
+    /* 戰利品與永久裝備標籤 */
     .room-decor {
       position: absolute;
-      top: 14px;
-      right: 14px;
+      top: 12px;
+      right: 12px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       align-items: flex-end;
       z-index: 10;
+      max-height: 180px;
+      overflow-y: auto;
     }
     .decor-tag {
       background: rgba(255, 253, 249, 0.92);
       color: #3d352e;
-      padding: 4px 10px;
+      padding: 3px 9px;
       border-radius: 12px;
       font-size: 11px;
       font-weight: bold;
@@ -199,10 +201,8 @@
       transition: transform 0.25s ease;
       filter: drop-shadow(0 6px 6px rgba(61, 53, 46, 0.25));
     }
-    /* 預設朝左，往右走時水平翻轉 */
     .capy-svg-wrap.facing-right { transform: scaleX(-1); }
 
-    /* 待機呼吸 */
     .upper-body {
       transform-origin: 45px 65px;
       animation: idleBreathe 2.5s infinite ease-in-out;
@@ -212,7 +212,6 @@
       50% { transform: translateY(-2px); }
     }
 
-    /* 頭頂橘子微彈 */
     .capy-orange {
       transform-origin: 45px 14px;
       animation: orangeBob 2.5s infinite ease-in-out;
@@ -222,7 +221,6 @@
       50% { transform: translateY(-2.5px) rotate(4deg); }
     }
 
-    /* 定時眨眼 */
     .capy-eye {
       transform-origin: 36px 32px;
       animation: blink 4.5s infinite;
@@ -232,7 +230,6 @@
       95% { transform: scaleY(0.1); }
     }
 
-    /* 雙腳站立行走：左右腳與手臂交替擺動 */
     .leg-left, .leg-right { transform-origin: 45px 82px; }
     .arm-left, .arm-right { transform-origin: 45px 54px; }
 
@@ -255,7 +252,6 @@
       to   { transform: translateY(-3px); }
     }
 
-    /* 離家字條狀態 */
     .away-note {
       background: #fff9db;
       border: 1.5px dashed #d4a373;
@@ -268,7 +264,6 @@
       transform: rotate(-2deg);
     }
 
-    /* 點擊愛心特效 */
     .heart-pop {
       position: absolute;
       font-size: 20px;
@@ -335,7 +330,7 @@
       background: #fffdf9;
       color: #3d352e;
       width: 100%;
-      max-height: 75%;
+      max-height: 78%;
       border-radius: 22px 22px 0 0;
       padding: 20px;
       overflow-y: auto;
@@ -344,11 +339,37 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       font-weight: bold;
       font-size: 16px;
     }
     .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #8c7a6b; }
+
+    /* 商店分類頁籤 */
+    .shop-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .tab-btn {
+      background: #f2ebe1;
+      border: 1px solid #e6ccb2;
+      color: #5c4d3c;
+      padding: 6px 10px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
     .slot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
     .slot-card {
       border: 2px dashed #d4a373;
@@ -368,16 +389,23 @@
       border: 1px solid #e6ccb2;
       border-radius: 12px;
       background: #fff;
+      gap: 8px;
     }
     .btn-action {
       background: var(--primary);
       color: white;
       border: none;
-      padding: 6px 14px;
+      padding: 7px 12px;
       border-radius: 10px;
       font-size: 12px;
       font-weight: bold;
+      white-space: nowrap;
       cursor: pointer;
+    }
+    .btn-action:disabled {
+      background: #ced4da;
+      color: #6c757d;
+      cursor: not-allowed;
     }
     .postcard-card {
       border: 1px solid #e6ccb2;
@@ -398,13 +426,13 @@
   <div class="top-bar">
     <div class="title-trigger" onclick="handleSecretTap()" title="水豚社畜日記">🍊 水豚社畜日記</div>
     <div class="stat-group">
-      <div class="stat-badge" id="uiMood">😊 75</div>
-      <div class="stat-badge" id="uiStamina">⚡ 80</div>
-      <div class="stat-badge" id="uiMoney">💰 16,000</div>
+      <div class="stat-badge" id="uiMood">😊 70</div>
+      <div class="stat-badge" id="uiStamina">⚡ 75</div>
+      <div class="stat-badge" id="uiMoney">💰 1,500</div>
     </div>
   </div>
 
-  <!-- 正式時間列 (乾淨無測試鈕) -->
+  <!-- 正式時間列 -->
   <div class="time-bar">
     <span id="uiClock">載入時間中...</span>
     <span id="uiRoleTag" style="font-size:11px; color:#8c7a6b;">即時陪伴模式</span>
@@ -425,7 +453,6 @@
   <!-- 房間主舞台 -->
   <div class="room-stage" id="roomStage" onclick="handleRoomClick(event)">
     <svg class="room-svg-bg" viewBox="0 0 420 460" preserveAspectRatio="none">
-      <!-- 牆壁踢腳板與木地板 -->
       <rect x="0" y="245" width="420" height="10" fill="#b08968" />
       <rect x="0" y="255" width="420" height="205" fill="#ddb892" />
       <line x1="0" y1="295" x2="420" y2="295" stroke="#cca077" stroke-width="1.5" />
@@ -433,7 +460,6 @@
       <line x1="0" y1="375" x2="420" y2="375" stroke="#cca077" stroke-width="1.5" />
       <line x1="0" y1="415" x2="420" y2="415" stroke="#cca077" stroke-width="1.5" />
 
-      <!-- 圓形編織地毯 -->
       <ellipse cx="215" cy="360" rx="115" ry="42" fill="#faedcd" stroke="#d4a373" stroke-width="3" />
       <ellipse cx="215" cy="360" rx="98" ry="34" fill="none" stroke="#e9edc9" stroke-width="2" stroke-dasharray="6,4" />
 
@@ -481,20 +507,16 @@
       </g>
     </svg>
 
-    <!-- 戰利品小標籤 -->
+    <!-- 已解鎖裝備與戰利品標籤 -->
     <div class="room-decor" id="uiDecor"></div>
 
     <!-- 擬人化雙腳站立水豚主角 -->
     <div class="capy-actor" id="capyActor" onclick="petCapybara(event)">
-      <div class="thought-bubble" id="capyBubble">今天也要努力生存...</div>
+      <div class="thought-bubble" id="capyBubble">存錢買 PS5 玩 GTA 6...</div>
       
-      <!-- 雙腳站立穿襯衫打領帶的水豚 SVG -->
       <div class="capy-svg-wrap" id="capySvgWrap">
         <svg viewBox="0 0 90 115" width="90" height="115">
-          <!-- 後側手臂 (左手) -->
           <rect class="arm-left" x="40" y="52" width="9" height="24" rx="4.5" fill="#8b5e34" />
-
-          <!-- 雙腳站立腿部 (穿深藍西裝褲與棕色皮鞋) -->
           <g class="leg-left">
             <rect x="36" y="80" width="9" height="22" rx="4" fill="#3d405b" />
             <ellipse cx="38" cy="103" rx="7" ry="3.5" fill="#5c4033" />
@@ -504,45 +526,30 @@
             <ellipse cx="48" cy="103" rx="7" ry="3.5" fill="#4a3328" />
           </g>
 
-          <!-- 上半身骨架 -->
           <g class="upper-body">
-            <!-- 短尾巴 -->
             <circle cx="62" cy="76" r="3.5" fill="#7f5539" />
-
-            <!-- 社畜白襯衫身體 -->
             <rect x="30" y="48" width="30" height="34" rx="12" fill="#ffffff" stroke="#ced4da" stroke-width="1.5" />
-            <!-- 襯衫領子與紅色小領帶 -->
             <polygon points="35,48 41,54 45,48" fill="#e9ecef" />
             <polygon points="36,51 40,51 39,68 37,71 35,68" fill="#e07a5f" />
-            <!-- 西裝短褲腰帶 -->
             <rect x="30" y="75" width="30" height="9" rx="3" fill="#3d405b" />
 
-            <!-- 直立擬人化水豚頭部 (朝左) -->
             <rect x="22" y="18" width="42" height="33" rx="15" fill="#b07d56" />
-            <!-- 吻部深色區塊 -->
             <rect x="19" y="28" width="20" height="20" rx="9" fill="#8b5e34" />
-            <!-- 鼻子與嘴巴 -->
             <circle cx="24" cy="34" r="2" fill="#3d2b1f" />
             <path d="M 24 36 L 24 41 M 21 41 Q 24 43 27 41" stroke="#3d2b1f" stroke-width="1.6" fill="none" stroke-linecap="round" />
-            <!-- 小耳朵 -->
             <ellipse cx="55" cy="20" rx="4.5" ry="6" transform="rotate(20 55 20)" fill="#7f5539" />
-            <!-- 淡定瞇瞇眼 -->
             <g class="capy-eye">
               <line x1="35" y1="30" x2="42" y2="30" stroke="#3d2b1f" stroke-width="2.4" stroke-linecap="round" />
             </g>
-            <!-- 腮紅 -->
             <ellipse cx="38" cy="36" rx="4" ry="2.2" fill="#e07a5f" opacity="0.55" />
 
-            <!-- 頭頂招牌小橘子 -->
             <g class="capy-orange">
               <circle cx="44" cy="12" r="6.5" fill="#f77f00" />
               <ellipse cx="46" cy="5.5" rx="4" ry="2" transform="rotate(-15 46 5.5)" fill="#588157" />
             </g>
 
-            <!-- 前側手臂 (右手) -->
             <rect class="arm-right" x="43" y="52" width="10" height="24" rx="5" fill="#a47148" />
 
-            <!-- 遊戲手把 (買到 PS5 後打電動時拿在手上) -->
             <g id="capyController" style="display:none;" transform="translate(22, 66)">
               <rect x="0" y="0" width="16" height="10" rx="4" fill="#f8f9fa" stroke="#495057" stroke-width="1.5" />
               <circle cx="4" cy="5" r="1.5" fill="#00b4d8" />
@@ -552,7 +559,6 @@
         </svg>
       </div>
 
-      <!-- 出門上班時的桌上字條 -->
       <div class="away-note" id="awayNote" style="display:none;">
         📝 出門上班囉！<br/><span style="font-size:11px; font-weight:normal;">18:00 準時回家</span>
       </div>
@@ -591,12 +597,18 @@
     </div>
   </div>
 
-  <!-- 商店彈窗 -->
+  <!-- 商店彈窗 (含四大分類頁籤) -->
   <div class="modal-overlay" id="shopModal">
     <div class="modal-sheet">
       <div class="modal-header">
-        <span>🛒 24H 社畜補給站</span>
+        <span>🛒 24H 社畜補給與家電商城</span>
         <button class="close-btn" onclick="closeModal('shopModal')">✕</button>
+      </div>
+      <div class="shop-tabs">
+        <button class="tab-btn active" onclick="switchShopTab('food', this)">🍱 便當飲品</button>
+        <button class="tab-btn" onclick="switchShopTab('item', this)">🧿 職場小物</button>
+        <button class="tab-btn" onclick="switchShopTab('gear', this)">🎒 永久神器</button>
+        <button class="tab-btn" onclick="switchShopTab('dream', this)">🏠 夢想家電</button>
       </div>
       <div class="item-list" id="shopList"></div>
     </div>
@@ -616,16 +628,35 @@
 
 <script>
   const CONFIG_URL = './events_config.json';
-  const STORAGE_KEY = 'office_animal_v6';
-  const ADMIN_PASS = 'yoke2026'; // 管理者後台密碼，可自行修改
+  const STORAGE_KEY = 'office_animal_v7';
+  const ADMIN_PASS = 'yoke2026';
 
+  // 擴充至 16 種商品，分為 food(便當飲品)、item(消耗小物)、gear(永久職場神器)、dream(夢想家電)
   const ITEMS_DB = {
-    food_onigiri: { id: 'food_onigiri', name: '🍙 超商御飯糰', type: 'food', price: 100, desc: '基本飽足，肝力 +5', effects: { stamina: 5, mood: 0, otReduce: 0 } },
-    food_bento: { id: 'food_bento', name: '🍱 特製愛心便當', type: 'food', price: 500, desc: '心情 +15，準時下班率 +10%', effects: { stamina: 10, mood: 15, otReduce: 0.10 } },
-    food_coffee: { id: 'food_coffee', name: '☕ 雙倍濃縮冰美式', type: 'food', price: 150, desc: '肝力 +20，但心情 -5', effects: { stamina: 20, mood: -5, otReduce: 0.05 } },
-    item_guaiguai: { id: 'item_guaiguai', name: '🟢 機房綠色乖乖', type: 'item', price: 80, desc: '防當機神物，加班率 -15%', effects: { otReduce: 0.15, gtaBoost: 1 } },
-    item_headphone: { id: 'item_headphone', name: '🎧 降噪耳機', type: 'item', price: 1200, desc: '隔絕無效會議，心情 +5', effects: { mood: 5, otReduce: 0.05, gtaBoost: 1 } },
-    item_game_flyer: { id: 'item_game_flyer', name: '🎮 《GTA 6》預購宣傳單', type: 'item', price: 300, desc: '下班衝去買 PS5 玩 GTA 權重 x4！', effects: { otReduce: 0.05, gtaBoost: 4 } }
+    // 1. 便當飲品 (消耗品)
+    food_discount: { id: 'food_discount', category: 'food', name: '🏷️ 乞丐超人友善時光餐', type: 'food', price: 45, desc: '省錢首選！肝力 +4，但心情 -3', effects: { stamina: 4, mood: -3, otReduce: 0 } },
+    food_onigiri:  { id: 'food_onigiri',  category: 'food', name: '🍙 超商御飯糰 + 麥茶', type: 'food', price: 85, desc: '基本飽足，肝力 +8', effects: { stamina: 8, mood: 1, otReduce: 0 } },
+    food_coffee:   { id: 'food_coffee',   category: 'food', name: '☕ 雙倍濃縮冰美式', type: 'food', price: 140, desc: '肝力 +22，但心悸心情 -5', effects: { stamina: 22, mood: -5, otReduce: 0.04 } },
+    food_healthy:  { id: 'food_healthy',  category: 'food', name: '🥗 舒肥雞胸健康餐盒', type: 'food', price: 220, desc: '肝力 +12，心情 +6', effects: { stamina: 12, mood: 6, otReduce: 0.05 } },
+    food_bento:    { id: 'food_bento',    category: 'food', name: '🍱 特製愛心豪華便當', type: 'food', price: 480, desc: '心情 +16，準時下班率 +10%', effects: { stamina: 15, mood: 16, otReduce: 0.10 } },
+    food_wagyu:    { id: 'food_wagyu',    category: 'food', name: '🥩 頂級和牛燒肉便當', type: 'food', price: 950, desc: '心情 +30、肝力 +25，準時下班 +15%', effects: { stamina: 25, mood: 30, otReduce: 0.15 } },
+
+    // 2. 職場小物 (消耗品)
+    item_guaiguai:   { id: 'item_guaiguai',   category: 'item', name: '🟢 機房綠色乖乖', type: 'item', price: 80, desc: '防當機神物，加班率 -14%', effects: { otReduce: 0.14, gtaBoost: 1 } },
+    item_redstring:  { id: 'item_redstring',  category: 'item', name: '📿 防小人紅線尾戒', type: 'item', price: 250, desc: '擋掉甩鍋，心情 +8、加班率 -8%', effects: { mood: 8, otReduce: 0.08, gtaBoost: 1 } },
+    item_lutein:     { id: 'item_lutein',     category: 'item', name: '👁️ 頂級葉黃素能量飲', type: 'item', price: 320, desc: '盯螢幕一整天不累，肝力 +18', effects: { stamina: 18, otReduce: 0.05, gtaBoost: 1 } },
+    item_game_flyer: { id: 'item_game_flyer', category: 'item', name: '🎮 《GTA 6》首發預購單', type: 'item', price: 400, desc: '下班衝去買 PS5 玩 GTA 權重 x4！', effects: { otReduce: 0.05, gtaBoost: 4 } },
+    item_flatter:    { id: 'item_flatter',    category: 'item', name: '📘 主管溝通與拍馬屁秘笈', type: 'item', price: 600, desc: '早會順利過關，加班率 -18%', effects: { otReduce: 0.18, gtaBoost: 1 } },
+
+    // 3. 永久職場神器 (限購 1 次，直接生效)
+    gear_headphone: { id: 'gear_headphone', category: 'gear', name: '🎧 主動式降噪耳機', type: 'permanent', price: 2800, desc: '【永久】隔絕無效會議，每日加班率 -8%', permTag: '🎧 降噪耳機', otPerm: 0.08 },
+    gear_keyboard:  { id: 'gear_keyboard',  category: 'gear', name: '⌨️ 客製化靜音機械鍵盤', type: 'permanent', price: 4500, desc: '【永久】打字效率倍增，每日薪資 +$250', permTag: '⌨️ 機械鍵盤', salaryPerm: 250 },
+    gear_chair:     { id: 'gear_chair',     category: 'gear', name: '💺 頂級人體工學網椅', type: 'permanent', price: 8800, desc: '【永久】久坐不腰痠，每日睡眠回復肝力 +15', permTag: '💺 工學網椅', sleepPerm: 15 },
+
+    // 4. 夢想居家大獎 (限購 1 次，解鎖房間擺設)
+    dream_switch:  { id: 'dream_switch',  category: 'dream', name: '🕹️ Switch OLED 掌上主機', type: 'permanent', price: 9800, desc: '【夢想家電】睡前在床上打電動，每日心情 +5', permTag: '🕹️ Switch 主機', moodPerm: 5 },
+    dream_ps5:     { id: 'dream_ps5',     category: 'dream', name: '🎮 PS5 Pro +《GTA 6》同捆組', type: 'permanent', price: 15000, desc: '【終極夢想】解鎖客廳主機與晚上打 GTA 動畫！', permTag: '🎮 PS5 Pro + GTA 6', moodPerm: 10 },
+    dream_massage: { id: 'dream_massage', category: 'dream', name: '🛋️ 全自動零重力按摩椅', type: 'permanent', price: 22000, desc: '【頂級享受】下班徹底放鬆，每日睡眠肝力 +25', permTag: '🛋️ 零重力按摩椅', sleepPerm: 25 }
   };
 
   let eventsPool = [
@@ -664,32 +695,33 @@
     day: 1,
     hour: now.getHours(),
     lastTimestamp: Date.now(),
-    mood: 75,
-    stamina: 80,
-    money: 16000,
+    mood: 70,
+    stamina: 75,
+    money: 1500, // 收緊初始資金為 $1,500
     isAtWork: now.getHours() >= 9 && now.getHours() < 18,
     isOvertimeToday: false,
     equipped: { food: null, item: null },
-    inventory: { food_bento: 1, item_game_flyer: 1 },
+    inventory: { food_onigiri: 1 }, // 初始只送 1 個御飯糰
+    ownedPermanent: [], // 已購買的永久裝備/夢想家電 ID
     decorations: [],
     album: [],
-    logs: [{ time: `Day 1 ${String(now.getHours()).padStart(2, '0')}:00`, text: '穿好襯衫打好領帶！點擊地板可叫水豚散步，點擊水豚可摸頭喔！' }]
+    logs: [{ time: `Day 1 ${String(now.getHours()).padStart(2, '0')}:00`, text: '菜鳥社畜報到！初始資金 $1,500，努力上班存錢買 PS5 吧！' }]
   };
 
   let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(DEFAULT_STATE));
   let actorPos = { x: 52, bottom: 65 };
   let walkTimer = null;
   let stopWalkTimeout = null;
+  let currentShopCategory = 'food';
   let isAdminAuthenticated = sessionStorage.getItem('wage_slave_admin') === 'true';
 
-  // 管理者登入驗證邏輯 (支援網址 ?admin=1 或連點標題 5 下)
+  // 管理者登入驗證邏輯
   let tapCount = 0;
   let tapResetTimer = null;
   function handleSecretTap() {
     tapCount += 1;
     if (tapResetTimer) clearTimeout(tapResetTimer);
     tapResetTimer = setTimeout(() => { tapCount = 0; }, 2000);
-
     if (tapCount >= 5) {
       tapCount = 0;
       promptAdminLogin();
@@ -740,7 +772,6 @@
   }
 
   async function initGame() {
-    // 檢查網址是否帶有 ?admin=1 參數
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('admin') === '1' && !isAdminAuthenticated) {
       promptAdminLogin();
@@ -754,10 +785,10 @@
         if (data.events && data.events.length > 0) eventsPool = data.events;
         document.getElementById('uiNewsBanner').textContent = data.active_banner || '💼 社畜生存戰持續進行中';
       } else {
-        document.getElementById('uiNewsBanner').textContent = '🔥 本週時事：《GTA 6》熱賣中！準時下班有機率帶回 PS5！';
+        document.getElementById('uiNewsBanner').textContent = '🔥 本週時事：《GTA 6》熱賣中！努力存錢買回 PS5 吧！';
       }
     } catch (e) {
-      document.getElementById('uiNewsBanner').textContent = '🔥 本週時事：《GTA 6》熱賣中！準時下班有機率帶回 PS5！';
+      document.getElementById('uiNewsBanner').textContent = '🔥 本週時事：《GTA 6》熱賣中！努力存錢買回 PS5 吧！';
     }
 
     const elapsedMs = Date.now() - (state.lastTimestamp || Date.now());
@@ -806,8 +837,8 @@
       const targetBottom = Math.floor(Math.random() * 90) + 38;
       const thoughts = [
         '領帶歪了嗎？整理一下 👔',
-        '今天下班要吃什麼呢？',
         '存錢買新遊戲機！',
+        '晚餐吃超商打折便當好嗎...',
         '穿皮鞋散步中 👞',
         '祈禱今天不要有緊急會議...'
       ];
@@ -900,6 +931,23 @@
     if (state.logs.length > 40) state.logs.pop();
   }
 
+  // 計算永久裝備加成
+  function getPermanentBonuses() {
+    let otReduce = 0;
+    let salaryBonus = 0;
+    let sleepBonus = 0;
+    let moodBonus = 0;
+    (state.ownedPermanent || []).forEach(id => {
+      const item = ITEMS_DB[id];
+      if (!item) return;
+      otReduce += item.otPerm || 0;
+      salaryBonus += item.salaryPerm || 0;
+      sleepBonus += item.sleepPerm || 0;
+      moodBonus += item.moodPerm || 0;
+    });
+    return { otReduce, salaryBonus, sleepBonus, moodBonus };
+  }
+
   function advanceTime(hoursToAdd, isManualSim = true) {
     if (isManualSim && !isAdminAuthenticated) return;
     for (let i = 0; i < hoursToAdd; i++) {
@@ -907,8 +955,13 @@
       if (state.hour >= 24) {
         state.hour = 0;
         state.day += 1;
-        state.money += 1500;
-        addLog(`💰 每日薪資入帳 +$1,500！`);
+        const bonuses = getPermanentBonuses();
+        const dailyPay = 1200 + bonuses.salaryBonus;
+        state.money += dailyPay;
+        if (bonuses.moodBonus > 0) {
+          state.mood = Math.min(100, state.mood + bonuses.moodBonus);
+        }
+        addLog(`💰 每日薪資入帳 +$${dailyPay.toLocaleString()}！`);
       }
       processHourTick(state.hour);
     }
@@ -947,7 +1000,8 @@
     }
 
     if (h === 18 && state.isAtWork) {
-      let otChance = 0.40;
+      const bonuses = getPermanentBonuses();
+      let otChance = 0.42 - bonuses.otReduce;
       let gtaMultiplier = 1;
 
       if (state.equipped.food) {
@@ -976,8 +1030,10 @@
     }
 
     if (h === 1 && !state.isAtWork) {
-      state.stamina = Math.min(100, state.stamina + 35);
-      addLog('💤 進入深度睡眠，肝力回復 +35。');
+      const bonuses = getPermanentBonuses();
+      const recover = 35 + bonuses.sleepBonus;
+      state.stamina = Math.min(100, state.stamina + recover);
+      addLog(`💤 進入深度睡眠，肝力回復 +${recover}。`);
     }
   }
 
@@ -1003,7 +1059,7 @@
       const otCandidates = eventsPool.filter(e => e.type === 'OVERTIME');
       const selected = otCandidates.length > 0 ? weightedPick(otCandidates, 1) : {
         title: '💻 系統大當機被迫加班',
-        moneyDelta: 600,
+        moneyDelta: 550,
         moodDelta: -18,
         staminaDelta: -25,
         avatar: '🦫💦',
@@ -1031,6 +1087,9 @@
 
     if (evt.unlockDecor && !state.decorations.includes(evt.unlockDecor)) {
       state.decorations.push(evt.unlockDecor);
+      if (evt.unlockDecor.includes('PS5') && !state.ownedPermanent.includes('dream_ps5')) {
+        state.ownedPermanent.push('dream_ps5');
+      }
     }
 
     state.album.unshift({
@@ -1122,6 +1181,13 @@
     document.getElementById(id).classList.remove('show');
   }
 
+  function switchShopTab(category, btnEl) {
+    currentShopCategory = category;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+    renderShop();
+  }
+
   function renderInventory() {
     const list = document.getElementById('inventoryList');
     const keys = Object.keys(state.inventory).filter(k => state.inventory[k] > 0);
@@ -1163,27 +1229,59 @@
 
   function renderShop() {
     const list = document.getElementById('shopList');
-    list.innerHTML = Object.values(ITEMS_DB).map(item => `
-      <div class="item-row">
-        <div>
-          <strong>${item.name}</strong> - $${item.price}
-          <div style="font-size:11px; color:#8c7a6b;">${item.desc}</div>
+    const filtered = Object.values(ITEMS_DB).filter(item => item.category === currentShopCategory);
+
+    list.innerHTML = filtered.map(item => {
+      const isPerm = item.type === 'permanent';
+      const isOwned = isPerm && (state.ownedPermanent || []).includes(item.id);
+      const canAfford = state.money >= item.price;
+
+      let btnText = '購買';
+      let disabledAttr = '';
+      if (isOwned) {
+        btnText = '已擁有';
+        disabledAttr = 'disabled';
+      } else if (!canAfford) {
+        btnText = '餘額不足';
+        disabledAttr = 'disabled';
+      }
+
+      return `
+        <div class="item-row">
+          <div>
+            <strong>${item.name}</strong> - <span style="color:#e07a5f; font-weight:bold;">$${item.price.toLocaleString()}</span>
+            <div style="font-size:11px; color:#8c7a6b; margin-top:2px;">${item.desc}</div>
+          </div>
+          <button class="btn-action" onclick="buyItem('${item.id}')" ${disabledAttr}>${btnText}</button>
         </div>
-        <button class="btn-action" onclick="buyItem('${item.id}')">購買</button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   function buyItem(itemId) {
     const item = ITEMS_DB[itemId];
-    if (state.money >= item.price) {
+    if (state.money < item.price) {
+      alert('存款不足！先努力上班賺錢吧！');
+      return;
+    }
+
+    if (item.type === 'permanent') {
+      if (!state.ownedPermanent) state.ownedPermanent = [];
+      if (state.ownedPermanent.includes(item.id)) return;
+      state.money -= item.price;
+      state.ownedPermanent.push(item.id);
+      if (item.permTag && !state.decorations.includes(item.permTag)) {
+        state.decorations.push(item.permTag);
+      }
+      addLog(`✨ 入手永久裝備【${item.name}】(-$${item.price.toLocaleString()})！`);
+    } else {
       state.money -= item.price;
       state.inventory[itemId] = (state.inventory[itemId] || 0) + 1;
       addLog(`🛒 購買了【${item.name}】(-$${item.price})`);
-      saveState();
-    } else {
-      alert('存款不足！先努力上班賺錢吧！');
     }
+
+    saveState();
+    renderShop();
   }
 
   function renderAlbum() {
