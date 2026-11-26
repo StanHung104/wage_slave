@@ -3,304 +3,217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>社畜觀察日記 v4</title>
+  <title>社畜觀察日記 v5</title>
   <style>
-    :root {
-      --wall-day: #f7efe2;
-      --wall-evening: #f3d5c0;
-      --wall-night: #1d2233;
-      --text-main: #3d352e;
-      --primary: #e07a5f;
-      --secondary: #81b29a;
-    }
     * { box-sizing: border-box; font-family: "PingFang TC", "Microsoft JhengHei", -apple-system, sans-serif; user-select: none; }
     body {
       margin: 0;
-      background-color: #2b2927;
+      background-color: #1c1917;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
     }
+
+    /* 滿版手遊視窗 */
     .game-container {
       width: 100%;
-      max-width: 420px;
+      max-width: 430px;
       height: 100vh;
-      max-height: 850px;
-      background: var(--wall-day);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+      max-height: 880px;
       position: relative;
       overflow: hidden;
-      transition: background 1s ease;
-    }
-    .game-container.evening { background: var(--wall-evening); }
-    .game-container.night { background: var(--wall-night); color: #f4f1de; }
-
-    /* 時事跑馬燈 */
-    .news-banner {
-      background: #e07a5f;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 12px;
-      text-align: center;
-      letter-spacing: 0.5px;
-      z-index: 20;
+      background: #f5ebe0;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
 
-    /* 頂部狀態列 */
-    .top-bar {
-      background: rgba(255, 253, 249, 0.94);
-      color: var(--text-main);
-      padding: 10px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(61, 53, 46, 0.08);
-      z-index: 20;
-    }
-    .stat-group { display: flex; gap: 6px; font-size: 12px; font-weight: 700; }
-    .stat-badge {
-      background: #f2ebe1;
-      padding: 4px 9px;
-      border-radius: 14px;
-      color: #4a4036;
-    }
-
-    /* 時間與可收合測試工具列 */
-    .time-bar {
-      background: rgba(61, 53, 46, 0.05);
-      padding: 6px 14px;
-      font-size: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 20;
-    }
-    .night .time-bar { background: rgba(255, 255, 255, 0.08); }
-    .dev-controls { display: none; gap: 5px; }
-    .dev-controls.open { display: flex; }
-    .btn-mini {
-      background: #3d405b;
-      color: #fff;
-      border: none;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      cursor: pointer;
-    }
-
-    /* 房間主舞台 */
-    .room-stage {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .room-svg-bg {
+    /* 滿版房間背景圖層 (支援外部手繪圖與日夜光影濾鏡) */
+    .room-backdrop {
       position: absolute;
       inset: 0;
-      width: 100%;
-      height: 100%;
+      background-image: url('./assets/room_bg.png'), radial-gradient(circle at 30% 25%, #fff3b0 0%, #e3d5ca 55%, #d5bdaf 100%);
+      background-size: cover;
+      background-position: center;
+      transition: filter 1.2s ease;
+    }
+    .room-backdrop.evening { filter: sepia(0.25) brightness(0.92) hue-rotate(-10deg); }
+    .room-backdrop.night { filter: brightness(0.62) contrast(1.08) hue-rotate(190deg) saturate(1.2); }
+
+    /* 夜晚暖色檯燈光暈 */
+    .night-lamp-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 65% 55%, rgba(255, 214, 102, 0.28) 0%, transparent 55%);
+      opacity: 0;
       pointer-events: none;
+      transition: opacity 1.2s ease;
+    }
+    .night .night-lamp-glow { opacity: 1; }
+
+    /* 頂部懸浮透明狀態列 (不遮擋畫面) */
+    .hud-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 20;
+      background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 100%);
+    }
+    .hud-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .glass-pill {
+      background: rgba(255, 252, 247, 0.86);
+      backdrop-filter: blur(8px);
+      padding: 5px 11px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #432818;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .news-ticker {
+      background: rgba(224, 122, 95, 0.92);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
 
-    /* 戰利品小標籤 */
-    .room-decor {
+    /* 戰利品展示徽章 (右上懸浮) */
+    .decor-rack {
       position: absolute;
-      top: 14px;
+      top: 96px;
       right: 14px;
       display: flex;
       flex-direction: column;
       gap: 6px;
       align-items: flex-end;
-      z-index: 10;
-    }
-    .decor-tag {
-      background: rgba(255, 253, 249, 0.92);
-      color: #3d352e;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: bold;
-      border: 1px solid #e6ccb2;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      z-index: 15;
     }
 
-    /* 水豚角色容器 */
-    .capy-actor {
+    /* 主角定點情境舞台 (置於房間視覺重心) */
+    .character-stage {
       position: absolute;
-      left: 52%;
-      bottom: 68px;
-      transform: translate(-50%, 0);
-      transition: left 2.6s cubic-bezier(0.45, 0.05, 0.55, 0.95), bottom 2.6s cubic-bezier(0.45, 0.05, 0.55, 0.95);
-      z-index: 15;
+      left: 50%;
+      bottom: 18%;
+      transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
+      z-index: 12;
       cursor: pointer;
     }
 
-    /* 柔和思考氣泡 */
-    .thought-bubble {
-      background: #fffdf9;
-      color: #3d352e;
-      padding: 6px 12px;
-      border-radius: 16px;
+    /* 療癒對話氣泡 */
+    .story-bubble {
+      background: rgba(255, 253, 249, 0.94);
+      color: #432818;
+      padding: 8px 14px;
+      border-radius: 18px;
       font-size: 12px;
       font-weight: 600;
-      white-space: nowrap;
-      border: 1.5px solid #e6ccb2;
-      box-shadow: 0 4px 10px rgba(61, 53, 46, 0.12);
-      margin-bottom: 4px;
-      position: relative;
-      max-width: 230px;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      max-width: 260px;
+      text-align: center;
+      line-height: 1.4;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      margin-bottom: 10px;
+      border: 1.5px solid #eddcd2;
+      animation: floatBubble 3s infinite ease-in-out;
     }
-    .thought-bubble::after {
-      content: '';
-      position: absolute;
-      bottom: -6px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-width: 6px 6px 0;
-      border-style: solid;
-      border-color: #fffdf9 transparent transparent;
+    @keyframes floatBubble {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
     }
 
-    /* 水豚 SVG 骨架動畫 */
-    .capy-svg-wrap {
-      width: 105px;
-      height: 85px;
-      transition: transform 0.3s ease;
-      filter: drop-shadow(0 6px 6px rgba(61, 53, 46, 0.22));
+    /* 主角圖片容器 (支援 PNG 插畫與呼吸微動畫) */
+    .char-artwork {
+      width: 190px;
+      height: 190px;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,0.28));
+      animation: gentleBreathe 3.2s infinite ease-in-out;
     }
-    .capy-svg-wrap.facing-right { transform: scaleX(-1); }
-
-    /* 待機呼吸動畫 */
-    .capy-body-group {
-      transform-origin: 50px 55px;
-      animation: breathe 2.4s infinite ease-in-out;
-    }
-    @keyframes breathe {
-      0%, 100% { transform: scaleY(1) translateY(0); }
-      50% { transform: scaleY(1.03) translateY(-1.5px); }
+    @keyframes gentleBreathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.025); }
     }
 
-    /* 頭頂橘子微彈 */
-    .capy-orange {
-      transform-origin: 36px 18px;
-      animation: orangeBob 2.4s infinite ease-in-out;
-    }
-    @keyframes orangeBob {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-2.5px) rotate(4deg); }
-    }
-
-    /* 定時眨眼 */
-    .capy-eye {
-      transform-origin: center;
-      animation: blink 4.5s infinite;
-    }
-    @keyframes blink {
-      0%, 92%, 100% { transform: scaleY(1); }
-      95% { transform: scaleY(0.1); }
+    /* 尚未放入 PNG 圖檔時的預設手繪風卡片 */
+    .placeholder-art-card {
+      width: 170px;
+      height: 150px;
+      background: rgba(255, 252, 247, 0.9);
+      border: 2px dashed #cb997e;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      text-align: center;
+      color: #6b705c;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
     }
 
-    /* 走路時四隻短腿交替邁步 */
-    .walking .leg-front-1 { animation: stepA 0.32s infinite alternate ease-in-out; }
-    .walking .leg-back-1  { animation: stepB 0.32s infinite alternate ease-in-out; }
-    .walking .leg-front-2 { animation: stepB 0.32s infinite alternate ease-in-out; }
-    .walking .leg-back-2  { animation: stepA 0.32s infinite alternate ease-in-out; }
-    .walking .capy-body-group { animation: walkBounce 0.32s infinite alternate ease-in-out; }
-
-    @keyframes stepA {
-      from { transform: translateX(-3px) rotate(-10deg); }
-      to   { transform: translateX(3px) rotate(10deg); }
-    }
-    @keyframes stepB {
-      from { transform: translateX(3px) rotate(10deg); }
-      to   { transform: translateX(-3px) rotate(-10deg); }
-    }
-    @keyframes walkBounce {
-      from { transform: translateY(0px); }
-      to   { transform: translateY(-3px); }
-    }
-
-    /* 離家字條狀態 */
-    .away-note {
-      background: #fff9db;
-      border: 1.5px dashed #d4a373;
-      padding: 12px 16px;
-      border-radius: 10px;
+    /* 出門上班時的木牌字條 */
+    .away-sign {
+      background: #fff8e7;
+      border: 2px solid #d4a373;
+      border-radius: 14px;
+      padding: 14px 20px;
+      text-align: center;
       color: #5c4d3c;
       font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transform: rotate(-2deg);
+      font-weight: 700;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.18);
     }
 
-    /* 點擊愛心特效 */
-    .heart-pop {
+    /* 底部懸浮圓形功能按鈕 (仿旅行青蛙極簡風) */
+    .hud-bottom {
       position: absolute;
-      font-size: 20px;
-      pointer-events: none;
-      animation: floatUp 1.1s ease-out forwards;
-      z-index: 30;
-    }
-    @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0) scale(0.8); }
-      100% { opacity: 0; transform: translateY(-48px) scale(1.25); }
-    }
-
-    /* 動態訊息紀錄區 */
-    .log-feed {
-      height: 135px;
-      background: rgba(255, 253, 249, 0.94);
-      color: #3d352e;
-      margin: 8px 14px 10px;
-      border-radius: 14px;
-      padding: 10px 14px;
-      overflow-y: auto;
-      font-size: 12px;
-      border: 1px solid rgba(61, 53, 46, 0.08);
-      z-index: 15;
-    }
-    .log-item { margin-bottom: 6px; border-bottom: 1px dashed #e6ccb2; padding-bottom: 5px; line-height: 1.45; }
-    .log-time { color: #8c7a6b; font-size: 11px; margin-right: 6px; font-weight: 600; }
-
-    /* 底部操作列 */
-    .bottom-nav {
-      background: #fffdf9;
-      padding: 10px 14px 14px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      border-top: 1px solid rgba(61, 53, 46, 0.1);
+      bottom: 18px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       z-index: 20;
     }
-    .nav-btn {
-      background: #f2ebe1;
-      border: 1px solid #e6ccb2;
-      padding: 10px 6px;
-      border-radius: 12px;
+    .circle-btn {
+      background: rgba(255, 252, 247, 0.94);
+      border: 2px solid #ddbea9;
+      border-radius: 24px;
+      padding: 10px 14px;
       font-size: 13px;
       font-weight: 700;
-      color: #3d352e;
+      color: #432818;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
       cursor: pointer;
-      transition: transform 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: transform 0.12s;
     }
-    .nav-btn:active { transform: scale(0.96); background: #e6ccb2; }
+    .circle-btn:active { transform: scale(0.94); }
 
     /* 彈窗 Modal */
     .modal-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(29, 34, 51, 0.55);
+      background: rgba(28, 25, 23, 0.6);
       display: none;
       justify-content: center;
       align-items: flex-end;
@@ -308,11 +221,11 @@
     }
     .modal-overlay.show { display: flex; }
     .modal-sheet {
-      background: #fffdf9;
-      color: #3d352e;
+      background: #fffcf7;
+      color: #432818;
       width: 100%;
-      max-height: 75%;
-      border-radius: 22px 22px 0 0;
+      max-height: 76%;
+      border-radius: 24px 24px 0 0;
       padding: 20px;
       overflow-y: auto;
     }
@@ -321,32 +234,32 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
-      font-weight: bold;
+      font-weight: 800;
       font-size: 16px;
     }
     .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #8c7a6b; }
     .slot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
     .slot-card {
-      border: 2px dashed #d4a373;
+      border: 2px dashed #cb997e;
       border-radius: 14px;
       padding: 12px;
       text-align: center;
       font-size: 13px;
-      background: #faf6f0;
+      background: #f8edeb;
     }
-    .slot-card.filled { border-style: solid; border-color: var(--primary); background: #fff3ef; }
+    .slot-card.filled { border-style: solid; border-color: #e07a5f; background: #fff1e6; }
     .item-list { display: flex; flex-direction: column; gap: 10px; }
     .item-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 10px 12px;
-      border: 1px solid #e6ccb2;
+      border: 1px solid #eddcd2;
       border-radius: 12px;
       background: #fff;
     }
     .btn-action {
-      background: var(--primary);
+      background: #e07a5f;
       color: white;
       border: none;
       padding: 6px 14px;
@@ -356,184 +269,71 @@
       cursor: pointer;
     }
     .postcard-card {
-      border: 1px solid #e6ccb2;
+      border: 1px solid #eddcd2;
       border-radius: 14px;
       padding: 14px;
       margin-bottom: 12px;
       background: #faf6f0;
     }
+    .log-item { font-size: 12px; padding: 8px 0; border-bottom: 1px dashed #eddcd2; line-height: 1.45; }
   </style>
 </head>
 <body>
 
 <div class="game-container" id="gameContainer">
-  <!-- 動態時事橫幅 -->
-  <div class="news-banner" id="uiNewsBanner">📡 正在同步最新職場與時事動態...</div>
+  <!-- 滿版房間背景與日夜光影 -->
+  <div class="room-backdrop" id="roomBackdrop"></div>
+  <div class="night-lamp-glow"></div>
 
-  <!-- 頂部數值 -->
-  <div class="top-bar">
-    <div style="font-weight: 800; font-size: 15px;">🍊 水豚社畜日記</div>
-    <div class="stat-group">
-      <div class="stat-badge" id="uiMood">😊 75</div>
-      <div class="stat-badge" id="uiStamina">⚡ 80</div>
-      <div class="stat-badge" id="uiMoney">💰 16,000</div>
+  <!-- 頂部懸浮透明 HUD -->
+  <div class="hud-top">
+    <div class="hud-row">
+      <div class="glass-pill">
+        <span id="uiClock">Day 1 | 08:00</span>
+        <button style="border:none; background:#6c5ce7; color:#fff; border-radius:8px; padding:2px 6px; font-size:10px; cursor:pointer;" onclick="advanceTime(3)">+3H</button>
+        <button style="border:none; background:#8c7a6b; color:#fff; border-radius:8px; padding:2px 6px; font-size:10px; cursor:pointer;" onclick="resetSave()">重置</button>
+      </div>
+      <div class="glass-pill">
+        <span id="uiMood">😊 75</span>
+        <span id="uiStamina">⚡ 80</span>
+        <span id="uiMoney">💰 16,000</span>
+      </div>
+    </div>
+    <div class="news-ticker" id="uiNewsBanner">📡 正在同步最新職場與時事動態...</div>
+  </div>
+
+  <!-- 戰利品小標籤 -->
+  <div class="decor-rack" id="uiDecor"></div>
+
+  <!-- 主角定點情境展示區 (直接載入外部手繪 PNG 插畫) -->
+  <div class="character-stage" id="charStage" onclick="petCapybara()">
+    <div class="story-bubble" id="uiBubble">今天也要努力生存...</div>
+
+    <!-- 外部手繪插畫載入器 -->
+    <img id="charImg" class="char-artwork" src="./assets/capy_idle.png" alt="水豚插畫"
+         onload="this.style.display='block'; document.getElementById('artFallback').style.display='none';"
+         onerror="this.style.display='none'; document.getElementById('artFallback').style.display='flex';" />
+
+    <!-- 尚未上傳 PNG 圖檔時的提示佔位卡片 -->
+    <div id="artFallback" class="placeholder-art-card">
+      <div style="font-size: 46px; margin-bottom: 6px;" id="fallbackEmoji">🦫🍊</div>
+      <div style="font-size: 11px; font-weight: bold;" id="fallbackStateName">狀態：居家休息 (capy_idle.png)</div>
+      <div style="font-size: 10px; margin-top: 4px; opacity: 0.8;">將 AI 手繪圖放入 assets/ 即可自動替換</div>
+    </div>
+
+    <!-- 出門上班時的木牌 -->
+    <div id="awaySign" class="away-sign" style="display:none;">
+      🚪 背起包包上班去囉！<br/>
+      <span style="font-size:11px; font-weight:normal;">點擊右下角「📜 日誌」查看最新動態</span>
     </div>
   </div>
 
-  <!-- 時間與測試工具列 -->
-  <div class="time-bar">
-    <span id="uiClock">載入時間中...</span>
-    <div style="display:flex; align-items:center; gap:6px;">
-      <div class="dev-controls" id="devControls">
-        <button class="btn-mini" onclick="advanceTime(3)">⏩ +3H</button>
-        <button class="btn-mini" style="background:#8c7a6b;" onclick="resetSave()">重置</button>
-      </div>
-      <button class="btn-mini" style="background:transparent; color:#6c5ce7; border:1px solid #6c5ce7;" onclick="toggleDevTools()">⚙️ 測試</button>
-    </div>
-  </div>
-
-  <!-- 日系溫馨向量房間主舞台 -->
-  <div class="room-stage" id="roomStage" onclick="handleRoomClick(event)">
-    <svg class="room-svg-bg" viewBox="0 0 420 460" preserveAspectRatio="none">
-      <!-- 牆壁踢腳板與木地板 -->
-      <rect x="0" y="245" width="420" height="10" fill="#b08968" />
-      <rect x="0" y="255" width="420" height="205" fill="#ddb892" />
-      <!-- 地板木紋線條 -->
-      <line x1="0" y1="295" x2="420" y2="295" stroke="#cca077" stroke-width="1.5" />
-      <line x1="0" y1="335" x2="420" y2="335" stroke="#cca077" stroke-width="1.5" />
-      <line x1="0" y1="375" x2="420" y2="375" stroke="#cca077" stroke-width="1.5" />
-      <line x1="0" y1="415" x2="420" y2="415" stroke="#cca077" stroke-width="1.5" />
-
-      <!-- 圓形編織地毯 -->
-      <ellipse cx="215" cy="360" rx="115" ry="42" fill="#faedcd" stroke="#d4a373" stroke-width="3" />
-      <ellipse cx="215" cy="360" rx="98" ry="34" fill="none" stroke="#e9edc9" stroke-width="2" stroke-dasharray="6,4" />
-
-      <!-- 左上方木窗 -->
-      <g transform="translate(28, 32)">
-        <rect x="0" y="0" width="94" height="98" rx="6" fill="#9c6644" />
-        <rect id="svgWindowSky" x="6" y="6" width="82" height="86" rx="3" fill="#a2d2ff" />
-        <!-- 窗外雲朵/月亮 -->
-        <circle id="svgWindowOrb" cx="62" cy="28" r="11" fill="#ffbe0b" />
-        <!-- 窗框十字 -->
-        <rect x="45" y="6" width="4" height="86" fill="#9c6644" />
-        <rect x="6" y="47" width="82" height="4" fill="#9c6644" />
-        <!-- 窗台小盆栽 -->
-        <polygon points="16,96 28,96 26,84 18,84" fill="#e07a5f" />
-        <circle cx="22" cy="80" r="7" fill="#81b29a" />
-      </g>
-
-      <!-- 左側單人床 -->
-      <g transform="translate(18, 210)">
-        <rect x="0" y="15" width="10" height="58" rx="3" fill="#7f5539" />
-        <rect x="10" y="38" width="110" height="24" rx="5" fill="#fffdf9" stroke="#d4a373" stroke-width="2" />
-        <!-- 枕頭與棉被 -->
-        <rect x="14" y="28" width="26" height="14" rx="6" fill="#f2ebe1" stroke="#cbbba0" stroke-width="1.5" />
-        <path d="M 45 36 Q 80 32 118 38 L 118 62 L 45 62 Z" fill="#81b29a" />
-        <rect x="8" y="60" width="112" height="8" rx="2" fill="#9c6644" />
-      </g>
-
-      <!-- 右側社畜電腦書桌 -->
-      <g transform="translate(285, 205)">
-        <!-- 桌面與桌腳 -->
-        <rect x="0" y="42" width="112" height="8" rx="3" fill="#9c6644" />
-        <rect x="10" y="50" width="8" height="36" fill="#7f5539" />
-        <rect x="94" y="50" width="8" height="36" fill="#7f5539" />
-        <!-- 螢幕與主機 -->
-        <rect x="34" y="12" width="46" height="26" rx="3" fill="#3d405b" />
-        <rect x="37" y="15" width="40" height="20" fill="#a8dadc" />
-        <rect x="53" y="38" width="8" height="4" fill="#6c757d" />
-        <!-- 桌燈 -->
-        <line x1="18" y1="42" x2="18" y2="24" stroke="#6c757d" stroke-width="2.5" />
-        <polygon points="10,24 26,24 22,15 14,15" fill="#f4a261" />
-      </g>
-
-      <!-- 左下方電視櫃與電視 -->
-      <g transform="translate(22, 375)">
-        <rect x="0" y="34" width="96" height="26" rx="4" fill="#9c6644" />
-        <rect x="14" y="2" width="54" height="32" rx="4" fill="#2b2d42" />
-        <rect id="svgTvScreen" x="17" y="5" width="48" height="26" fill="#4a4e69" />
-        <!-- 解鎖後出現的白色 PS5 主機 -->
-        <g id="svgPs5Group" style="display:none;">
-          <rect x="74" y="14" width="10" height="20" rx="2" fill="#ffffff" stroke="#ced4da" stroke-width="1.5" />
-          <line x1="77" y1="15" x2="77" y2="33" stroke="#00b4d8" stroke-width="1.5" />
-        </g>
-      </g>
-    </svg>
-
-    <!-- 戰利品小標籤 -->
-    <div class="room-decor" id="uiDecor"></div>
-
-    <!-- 精緻 SVG 水豚主角 -->
-    <div class="capy-actor" id="capyActor" onclick="petCapybara(event)">
-      <div class="thought-bubble" id="capyBubble">今天也要努力生存...</div>
-      
-      <!-- 在家時的 SVG 水豚骨架 -->
-      <div class="capy-svg-wrap" id="capySvgWrap">
-        <svg viewBox="0 0 110 90" width="105" height="85">
-          <!-- 後腳 -->
-          <rect class="leg-back-2" x="72" y="64" width="9" height="16" rx="4.5" fill="#7f5539" />
-          <rect class="leg-front-2" x="34" y="64" width="9" height="16" rx="4.5" fill="#7f5539" />
-          
-          <!-- 身體與頭部主骨架 -->
-          <g class="capy-body-group">
-            <!-- 圓滾滾身體 -->
-            <rect x="24" y="34" width="68" height="38" rx="19" fill="#a47148" />
-            <!-- 肚子陰影 -->
-            <path d="M 35 66 Q 58 72 80 66" stroke="#8b5e34" stroke-width="3" fill="none" stroke-linecap="round" />
-            <!-- 可愛短尾巴 -->
-            <circle cx="92" cy="50" r="4" fill="#7f5539" />
-            
-            <!-- 方圓招牌水豚頭 -->
-            <rect x="10" y="20" width="42" height="32" rx="14" fill="#b07d56" />
-            <!-- 吻部深色區塊 -->
-            <rect x="8" y="30" width="20" height="20" rx="9" fill="#8b5e34" />
-            <!-- 鼻子與呆萌嘴巴 -->
-            <circle cx="13" cy="36" r="2" fill="#3d2b1f" />
-            <path d="M 13 38 L 13 43 M 10 43 Q 13 45 16 43" stroke="#3d2b1f" stroke-width="1.6" fill="none" stroke-linecap="round" />
-            <!-- 小耳朵 -->
-            <ellipse cx="44" cy="21" rx="4.5" ry="6" transform="rotate(20 44 21)" fill="#7f5539" />
-            <!-- 淡定瞇瞇眼 -->
-            <g class="capy-eye">
-              <line x1="26" y1="30" x2="33" y2="30" stroke="#3d2b1f" stroke-width="2.4" stroke-linecap="round" />
-            </g>
-            <!-- 腮紅 -->
-            <ellipse cx="29" cy="36" rx="4" ry="2.2" fill="#e07a5f" opacity="0.55" />
-
-            <!-- 頭頂招牌小橘子 -->
-            <g class="capy-orange">
-              <circle cx="34" cy="14" r="7" fill="#f77f00" />
-              <ellipse cx="36" cy="7" rx="4" ry="2" transform="rotate(-15 36 7)" fill="#588157" />
-            </g>
-
-            <!-- 遊戲手把 (買到 PS5 後打電動時顯示) -->
-            <g id="capyController" style="display:none;" transform="translate(8, 46)">
-              <rect x="0" y="0" width="16" height="10" rx="4" fill="#f8f9fa" stroke="#495057" stroke-width="1.5" />
-              <circle cx="4" cy="5" r="1.5" fill="#00b4d8" />
-              <circle cx="12" cy="5" r="1.5" fill="#e07a5f" />
-            </g>
-          </g>
-
-          <!-- 前腳 -->
-          <rect class="leg-back-1" x="64" y="66" width="10" height="16" rx="5" fill="#9c6644" />
-          <rect class="leg-front-1" x="26" y="66" width="10" height="16" rx="5" fill="#9c6644" />
-        </svg>
-      </div>
-
-      <!-- 出門上班時的桌上字條 -->
-      <div class="away-note" id="awayNote" style="display:none;">
-        📝 出門上班囉！<br/><span style="font-size:11px; font-weight:normal;">18:00 準時回家</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- 即時動態紀錄區 -->
-  <div class="log-feed" id="uiLogFeed"></div>
-
-  <!-- 底部功能鈕 -->
-  <div class="bottom-nav">
-    <button class="nav-btn" onclick="openModal('bagModal')">🎒 行前背包</button>
-    <button class="nav-btn" onclick="openModal('shopModal')">🛒 便利商店</button>
-    <button class="nav-btn" onclick="openModal('albumModal')">📖 社畜寫真 (<span id="uiAlbumCount">0</span>)</button>
+  <!-- 底部極簡懸浮按鈕 -->
+  <div class="hud-bottom">
+    <button class="circle-btn" onclick="openModal('bagModal')">🎒 背包</button>
+    <button class="circle-btn" onclick="openModal('shopModal')">🛒 商店</button>
+    <button class="circle-btn" onclick="openModal('albumModal')">📖 寫真 (<span id="uiAlbumCount">0</span>)</button>
+    <button class="circle-btn" onclick="openModal('logModal')">📜 日誌</button>
   </div>
 
   <!-- 背包彈窗 -->
@@ -579,11 +379,22 @@
       <div id="albumList"></div>
     </div>
   </div>
+
+  <!-- 社畜動態日誌彈窗 -->
+  <div class="modal-overlay" id="logModal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span>📜 社畜生存動態紀錄</span>
+        <button class="close-btn" onclick="closeModal('logModal')">✕</button>
+      </div>
+      <div id="uiLogFeed"></div>
+    </div>
+  </div>
 </div>
 
 <script>
   const CONFIG_URL = './events_config.json';
-  const STORAGE_KEY = 'office_animal_v4';
+  const STORAGE_KEY = 'office_animal_v5';
 
   const ITEMS_DB = {
     food_onigiri: { id: 'food_onigiri', name: '🍙 超商御飯糰', type: 'food', price: 100, desc: '基本飽足，肝力 +5', effects: { stamina: 5, mood: 0, otReduce: 0 } },
@@ -638,17 +449,11 @@
     inventory: { food_bento: 1, item_game_flyer: 1 },
     decorations: [],
     album: [],
-    logs: [{ time: 'Day 1 08:00', text: '早上好！點擊地板可叫水豚散步，點擊水豚可摸頭喔！' }]
+    logs: [{ time: 'Day 1 08:00', text: '早上好！幫水豚準備好便當與小物，準備出門上班吧！' }]
   };
 
   let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(DEFAULT_STATE));
-  let actorPos = { x: 52, bottom: 68 };
-  let walkTimer = null;
-  let stopWalkTimeout = null;
-
-  function toggleDevTools() {
-    document.getElementById('devControls').classList.toggle('open');
-  }
+  let currentArtKey = '';
 
   async function initGame() {
     try {
@@ -673,110 +478,12 @@
 
     state.lastTimestamp = Date.now();
     saveState();
-    startWanderingAI();
-  }
-
-  function startWanderingAI() {
-    if (walkTimer) clearInterval(walkTimer);
-    walkTimer = setInterval(() => {
-      if (state.isAtWork) return;
-
-      const controllerEl = document.getElementById('capyController');
-      const tvScreen = document.getElementById('svgTvScreen');
-      const hasPs5 = state.decorations.some(d => d.includes('PS5'));
-
-      // 深夜睡覺時間
-      if (state.hour >= 0 && state.hour < 7) {
-        controllerEl.style.display = 'none';
-        tvScreen.setAttribute('fill', '#4a4e69');
-        moveCapybaraTo(24, 145, '呼嚕呼嚕... 充電中 💤');
-        return;
-      }
-
-      // 晚間若有 PS5，高機率坐在電視前打電動
-      if (hasPs5 && state.hour >= 18 && Math.random() < 0.65) {
-        moveCapybaraTo(34, 42, '《GTA 6》主線任務推進中！🎮');
-        setTimeout(() => {
-          if (!state.isAtWork) {
-            controllerEl.style.display = 'block';
-            tvScreen.setAttribute('fill', '#48cae4');
-          }
-        }, 2500);
-        return;
-      }
-
-      controllerEl.style.display = 'none';
-      tvScreen.setAttribute('fill', '#4a4e69');
-
-      // 在地毯與木地板區悠閒散步
-      const targetX = Math.floor(Math.random() * 58) + 22;
-      const targetBottom = Math.floor(Math.random() * 90) + 38;
-      const thoughts = [
-        '頂著橘子保持情緒穩定 🍊',
-        '今天下班要吃什麼呢？',
-        '存錢升級房間家電！',
-        '地毯踩起來好舒服 🐾',
-        '祈禱今天不要有緊急會議...'
-      ];
-      moveCapybaraTo(targetX, targetBottom, thoughts[Math.floor(Math.random() * thoughts.length)]);
-    }, 4500);
-  }
-
-  function moveCapybaraTo(targetX, targetBottom, thoughtText) {
-    const actor = document.getElementById('capyActor');
-    const svgWrap = document.getElementById('capySvgWrap');
-    const bubble = document.getElementById('capyBubble');
-
-    if (targetX > actorPos.x) {
-      svgWrap.classList.add('facing-right');
-    } else if (targetX < actorPos.x) {
-      svgWrap.classList.remove('facing-right');
-    }
-
-    actorPos = { x: targetX, bottom: targetBottom };
-    actor.style.left = `${targetX}%`;
-    actor.style.bottom = `${targetBottom}px`;
-
-    svgWrap.classList.add('walking');
-    if (thoughtText) bubble.textContent = thoughtText;
-
-    if (stopWalkTimeout) clearTimeout(stopWalkTimeout);
-    stopWalkTimeout = setTimeout(() => {
-      svgWrap.classList.remove('walking');
-    }, 2600);
-  }
-
-  function handleRoomClick(e) {
-    if (state.isAtWork) return;
-    const stage = document.getElementById('roomStage');
-    const rect = stage.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
-
-    const fromBottom = rect.height - clickY;
-    if (fromBottom > 165 || fromBottom < 25) return;
-
-    document.getElementById('capyController').style.display = 'none';
-    const pctX = Math.min(80, Math.max(20, (clickX / rect.width) * 100));
-    moveCapybaraTo(pctX, fromBottom, '噠噠噠！散步過來囉~');
   }
 
   let lastPetTime = 0;
-  function petCapybara(e) {
-    e.stopPropagation();
+  function petCapybara() {
     if (state.isAtWork) return;
-
-    const stage = document.getElementById('roomStage');
-    const heart = document.createElement('div');
-    heart.className = 'heart-pop';
-    heart.textContent = '🧡';
-    heart.style.left = `${actorPos.x}%`;
-    heart.style.bottom = `${actorPos.bottom + 75}px`;
-    stage.appendChild(heart);
-    setTimeout(() => heart.remove(), 1100);
-
-    document.getElementById('capyBubble').textContent = '被摸頭了！幸福感上升 🍊';
-
+    document.getElementById('uiBubble').textContent = '頂著橘子發呆中... 被摸頭好幸福 🧡';
     if (Date.now() - lastPetTime > 10000) {
       lastPetTime = Date.now();
       state.mood = Math.min(100, state.mood + 2);
@@ -842,16 +549,12 @@
         state.mood = Math.min(100, Math.max(0, state.mood + (picked.moodDelta || 0)));
         state.stamina = Math.min(100, Math.max(0, state.stamina + (picked.staminaDelta || -10)));
         addLog(picked.log);
-      } else {
-        state.stamina = Math.max(0, state.stamina - 10);
-        addLog('📱 [LINE動態] 下午開會開到眼神死，肝力 -10...');
       }
     }
 
     if (h === 18 && state.isAtWork) {
       let otChance = 0.40;
       let gtaMultiplier = 1;
-
       if (state.equipped.food) {
         otChance -= ITEMS_DB[state.equipped.food].effects.otReduce || 0;
         state.equipped.food = null;
@@ -862,7 +565,6 @@
         gtaMultiplier = it.effects.gtaBoost || 1;
         state.equipped.item = null;
       }
-
       if (Math.random() < Math.max(0.05, otChance)) {
         state.isOvertimeToday = true;
         addLog('⚠️ 18:00 警報！突發急件降臨，今天被迫加班了...');
@@ -891,7 +593,6 @@
       totalWeight += w;
       return { evt, weight: w };
     });
-
     let randomVal = Math.random() * totalWeight;
     for (const item of weightedList) {
       if (randomVal < item.weight) return item.evt;
@@ -903,25 +604,16 @@
   function triggerAfterWorkEvent(isOvertime, gtaMultiplier) {
     if (isOvertime) {
       const otCandidates = eventsPool.filter(e => e.type === 'OVERTIME');
-      const selected = otCandidates.length > 0 ? weightedPick(otCandidates, 1) : {
-        title: '💻 系統大當機被迫加班',
-        moneyDelta: 600,
-        moodDelta: -18,
-        staminaDelta: -25,
-        avatar: '🦫💦',
-        log: '加班到晚上九點才回家，賺了微薄加班費但靈魂已出竅...'
-      };
+      const selected = otCandidates.length > 0 ? weightedPick(otCandidates, 1) : eventsPool[0];
       applyEventResult(selected);
       return;
     }
-
     const candidates = eventsPool.filter(e => {
       if (e.type !== 'AFTER_WORK') return false;
       if (state.mood < (e.minMood || 0)) return false;
       if (state.money < (e.minMoney || 0)) return false;
       return true;
     });
-
     const selected = candidates.length > 0 ? weightedPick(candidates, gtaMultiplier) : eventsPool[0];
     applyEventResult(selected);
   }
@@ -943,7 +635,7 @@
     });
 
     addLog(`🎉 【${evt.title}】${evt.log}`);
-    document.getElementById('capyBubble').textContent = evt.title;
+    document.getElementById('uiBubble').textContent = evt.log;
   }
 
   function renderUI() {
@@ -953,50 +645,61 @@
     document.getElementById('uiAlbumCount').textContent = state.album.length;
 
     const period = state.hour >= 6 && state.hour < 17 ? '白天' : (state.hour >= 17 && state.hour < 20 ? '黃昏' : '夜晚');
-    document.getElementById('uiClock').textContent = `Day ${state.day} | ${String(state.hour).padStart(2, '0')}:00 (${period})`;
+    document.getElementById('uiClock').textContent = `Day ${state.day} | ${String(state.hour).padStart(2, '0')}:00`;
 
     const container = document.getElementById('gameContainer');
-    container.className = 'game-container ' + (period === '黃昏' ? 'evening' : (period === '夜晚' ? 'night' : ''));
+    const backdrop = document.getElementById('roomBackdrop');
+    container.className = 'game-container ' + (period === '夜晚' ? 'night' : '');
+    backdrop.className = 'room-backdrop ' + (period === '黃昏' ? 'evening' : (period === '夜晚' ? 'night' : ''));
 
-    // 窗戶天空與日月光影切換
-    const winSky = document.getElementById('svgWindowSky');
-    const winOrb = document.getElementById('svgWindowOrb');
-    if (period === '白天') {
-      winSky.setAttribute('fill', '#a2d2ff');
-      winOrb.setAttribute('fill', '#ffbe0b');
-    } else if (period === '黃昏') {
-      winSky.setAttribute('fill', '#f4a261');
-      winOrb.setAttribute('fill', '#e76f51');
-    } else {
-      winSky.setAttribute('fill', '#1d3557');
-      winOrb.setAttribute('fill', '#f1faee');
-    }
-
-    // 戰利品與 PS5 主機顯示
     const decorEl = document.getElementById('uiDecor');
-    decorEl.innerHTML = state.decorations.map(d => `<div class="decor-tag">✨ ${d}</div>`).join('');
-    const hasPs5 = state.decorations.some(d => d.includes('PS5'));
-    document.getElementById('svgPs5Group').style.display = hasPs5 ? 'block' : 'none';
+    decorEl.innerHTML = state.decorations.map(d => `<div class="glass-pill">✨ ${d}</div>`).join('');
 
-    // 在家 vs 出門上班狀態切換
-    const svgWrap = document.getElementById('capySvgWrap');
-    const awayNote = document.getElementById('awayNote');
-    const bubble = document.getElementById('capyBubble');
+    const charImg = document.getElementById('charImg');
+    const artFallback = document.getElementById('artFallback');
+    const awaySign = document.getElementById('awaySign');
+    const bubble = document.getElementById('uiBubble');
+
     if (state.isAtWork) {
-      svgWrap.style.display = 'none';
-      awayNote.style.display = 'block';
+      charImg.style.display = 'none';
+      artFallback.style.display = 'none';
+      awaySign.style.display = 'block';
       bubble.style.display = 'none';
-      awayNote.innerHTML = state.isOvertimeToday
-        ? '📝 正在公司加班救火中...<br/><span style="font-size:11px; font-weight:normal;">預計 21:00 才會到家</span>'
-        : '📝 出門上班囉！<br/><span style="font-size:11px; font-weight:normal;">18:00 準時回家</span>';
+      awaySign.innerHTML = state.isOvertimeToday
+        ? '🔥 正在公司加班救火中...<br/><span style="font-size:11px; font-weight:normal;">預計 21:00 才會到家</span>'
+        : '🚪 背起包包上班去囉！<br/><span style="font-size:11px; font-weight:normal;">18:00 準時下班開獎</span>';
     } else {
-      svgWrap.style.display = 'block';
-      awayNote.style.display = 'none';
+      awaySign.style.display = 'none';
       bubble.style.display = 'block';
+
+      // 根據當前情境決定要載入哪一張手繪插畫
+      const hasPs5 = state.decorations.some(d => d.includes('PS5'));
+      let targetArt = 'capy_idle.png';
+      let fallbackEmoji = '🦫🍊';
+      let fallbackLabel = '居家休息 (capy_idle.png)';
+
+      if (state.hour >= 0 && state.hour < 7) {
+        targetArt = 'capy_sleeping.png';
+        fallbackEmoji = '🦫💤';
+        fallbackLabel = '蓋被睡覺 (capy_sleeping.png)';
+        bubble.textContent = '呼嚕呼嚕... 正在充電恢復肝力...';
+      } else if (hasPs5 && state.hour >= 18) {
+        targetArt = 'capy_gaming.png';
+        fallbackEmoji = '🦫🎮';
+        fallbackLabel = '打電動破關 (capy_gaming.png)';
+      }
+
+      document.getElementById('fallbackEmoji').textContent = fallbackEmoji;
+      document.getElementById('fallbackStateName').textContent = fallbackLabel;
+
+      if (currentArtKey !== targetArt) {
+        currentArtKey = targetArt;
+        charImg.src = `./assets/${targetArt}`;
+      }
     }
 
     const logEl = document.getElementById('uiLogFeed');
-    logEl.innerHTML = state.logs.map(l => `<div class="log-item"><span class="log-time">[${l.time}]</span>${l.text}</div>`).join('');
+    logEl.innerHTML = state.logs.map(l => `<div class="log-item"><strong>[${l.time}]</strong> ${l.text}</div>`).join('');
 
     const slotFood = document.getElementById('slotFood');
     const slotItem = document.getElementById('slotItem');
@@ -1104,7 +807,7 @@
           <span style="font-size:11px; color:#8c7a6b;">${card.time}</span>
         </div>
         <div style="font-size:36px; text-align:center; margin:8px 0;">${card.avatar}</div>
-        <div style="font-size:13px; color:#3d352e;">${card.desc}</div>
+        <div style="font-size:13px; color:#432818;">${card.desc}</div>
       </div>
     `).join('');
   }
